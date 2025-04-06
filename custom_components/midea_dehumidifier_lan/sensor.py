@@ -6,7 +6,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfTemperature
+from homeassistant.const import PERCENTAGE, STATE_UNAVAILABLE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -15,6 +15,8 @@ from custom_components.midea_dehumidifier_lan.appliance_coordinator import (
 )
 from custom_components.midea_dehumidifier_lan.const import DOMAIN, UNIQUE_CLIMATE_PREFIX
 from custom_components.midea_dehumidifier_lan.hub import Hub
+
+UNAVAILABLE_STATES = [STATE_UNAVAILABLE]
 
 
 async def async_setup_entry(
@@ -53,6 +55,11 @@ class CurrentHumiditySensor(ApplianceEntity, SensorEntity):
     _name_suffix = " Humidity"
 
     def on_update(self) -> None:
+        # If the appliance is unavailable, set the value to None
+        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
+            self._attr_native_value = None
+            return
+
         self._attr_native_value = self.dehumidifier().current_humidity
 
 
@@ -65,6 +72,11 @@ class CurrentTemperatureSensor(ApplianceEntity, SensorEntity):
     _name_suffix = " Temperature"
 
     def on_update(self) -> None:
+        # If the appliance is unavailable, set the value to None
+        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
+            self._attr_native_value = None
+            return
+
         self._attr_native_value = self.dehumidifier().current_temperature
 
 
@@ -82,6 +94,11 @@ class TankLevelSensor(ApplianceEntity, SensorEntity):
         return super().on_online(update)
 
     def on_update(self) -> None:
+        # If the appliance is unavailable, set the value to None
+        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
+            self._attr_native_value = None
+            return
+
         self._attr_native_value = self.dehumidifier().tank_level
 
 
@@ -95,4 +112,9 @@ class OutsideTemperatureSensor(ApplianceEntity, SensorEntity):
     _name_suffix = " Outdoor Temperature"
 
     def on_update(self) -> None:
+        # If the appliance is unavailable, set the value to None
+        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
+            self._attr_native_value = None
+            return
+
         self._attr_native_value = self.airconditioner().outdoor_temperature
