@@ -1,5 +1,7 @@
 """Adds sensors for each appliance."""
 
+import logging
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -17,6 +19,9 @@ from custom_components.midea_dehumidifier_lan.const import DOMAIN, UNIQUE_CLIMAT
 from custom_components.midea_dehumidifier_lan.hub import Hub
 
 UNAVAILABLE_STATES = [STATE_UNAVAILABLE]
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -56,9 +61,18 @@ class CurrentHumiditySensor(ApplianceEntity, SensorEntity):
 
     def on_update(self) -> None:
         # If the appliance is unavailable, set the value to None
-        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
-            self._attr_native_value = None
-            return
+
+        state = self.hass.states.get(self.entity_id)
+        if state is not None:
+            _LOGGER.debug(
+                "%s is in state %s",
+                self.entity_id,
+                self.hass.states.get(self.entity_id).state,
+            )
+
+            if state.state in UNAVAILABLE_STATES:
+                self._attr_native_value = None
+                return
 
         self._attr_native_value = self.dehumidifier().current_humidity
 
@@ -73,7 +87,20 @@ class CurrentTemperatureSensor(ApplianceEntity, SensorEntity):
 
     def on_update(self) -> None:
         # If the appliance is unavailable, set the value to None
-        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
+
+        state = self.hass.states.get(self.entity_id)
+        if state is not None:
+            _LOGGER.debug(
+                "%s is in state %s",
+                self.entity_id,
+                self.hass.states.get(self.entity_id).state,
+            )
+
+            if state.state in UNAVAILABLE_STATES:
+                self._attr_native_value = None
+                return
+
+        if self.hass.states.get(self.entity_id) in UNAVAILABLE_STATES:
             self._attr_native_value = None
             return
 
@@ -95,9 +122,18 @@ class TankLevelSensor(ApplianceEntity, SensorEntity):
 
     def on_update(self) -> None:
         # If the appliance is unavailable, set the value to None
-        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
-            self._attr_native_value = None
-            return
+
+        state = self.hass.states.get(self.entity_id)
+        if state is not None:
+            _LOGGER.debug(
+                "%s is in state %s",
+                self.entity_id,
+                self.hass.states.get(self.entity_id).state,
+            )
+
+            if state.state in UNAVAILABLE_STATES:
+                self._attr_native_value = None
+                return
 
         self._attr_native_value = self.dehumidifier().tank_level
 
@@ -113,8 +149,17 @@ class OutsideTemperatureSensor(ApplianceEntity, SensorEntity):
 
     def on_update(self) -> None:
         # If the appliance is unavailable, set the value to None
-        if self.hass.states.get(self._attr_unique_id) in UNAVAILABLE_STATES:
-            self._attr_native_value = None
-            return
+
+        state = self.hass.states.get(self.entity_id)
+        if state is not None:
+            _LOGGER.debug(
+                "%s is in state %s",
+                self.entity_id,
+                self.hass.states.get(self.entity_id).state,
+            )
+
+            if state.state in UNAVAILABLE_STATES:
+                self._attr_native_value = None
+                return
 
         self._attr_native_value = self.airconditioner().outdoor_temperature
